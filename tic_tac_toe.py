@@ -37,7 +37,7 @@ class Player:
   def __repr__(self):
     return f"Logic for setting up Player #1 and their symbols for the game."
   
-  def setup_Player(self, symbol):
+  def setup_Player(self):
     try:
       self.symbol = str(input("Will you be 'X' or 'O'?").strip() or "X")
       while self.symbol != "X" and self.symbol != "O":
@@ -47,9 +47,9 @@ class Player:
 
 class Computer:
 
-  def __init__(self, difficulty_level, symbol):
+  def __init__(self, difficulty_level):
     self.difficulty = difficulty_level
-    self.symbol = symbol
+    self.symbol = 'O' if player.symbol == 'X' else 'X'
     
     if self.difficulty == "Easy" or self.difficulty == "1":
       self.setup_easy("TicTacTyro")
@@ -87,9 +87,46 @@ class TicTacToe:
   def __init__(self, player, opponent):
     self.player = player
     self.opponent = opponent
+    self.starter = self.decide_starting_player()
+
+    if isinstance(self.opponent, Computer):
+      self.start_game_PvE(self.player, self.opponent, self.starter)
+    elif isinstance(self.opponent, Opponent):
+      self.start_game_PvP(self.player, self.opponent, self.starter)
   
   def __repr__(self):
     return "Game Logic for Tic Tac Toe."
+  
+  def decide_starting_player(self):
+    try:
+      starter = str(input("Who will start the game? Player 1 or Player 2 ").strip() or 'Player 1')
+      while starter != 'Player 1' and starter != 'Player 2':
+        starter = str(input("The game currently doesn't answers outside of Player 1 or Player 2. If you are playing against a computer and would like it to start, select Player 2. Player 1 or Player 2? ").strip() or 'Player 1')
+    except EOFError:
+      starter = 'Player 1'
+    
+    return starter
+  
+  def start_game_PvE(self, player, opponent, starter):
+    self.player = player
+    self.opponent = opponent
+    self.starter = starter
+
+  def start_game_PvP(self, player, opponent, starter):
+    self.player = player
+    self.opponent = opponent
+    self.starter = starter
+  
+class Board:
+
+  def __init__(self):
+    self.board = [[' ' for _ in range(3)] for _ in range(3)]
+  
+  def display_Board(self, player1_moves, player2_moves):
+    self.player1_moves = []
+    self.player2_moves = []
+
+
 
 
 
