@@ -19,8 +19,8 @@ class Instructions:
     ---------------------------------------------------------------------------------------------------
     Instructions:
     This is a Python Terminal game based on the classic "Tic-Tac-Toe". You can play this game against 
-    the computer (PvE), or against another player (PvP). When prompted, choose "PvE" or "PvP", whether 
-    you would like to be "X" or "O", and who will go first. 
+    another player (PvP). When prompted, choose your names, whether you would like to be "X" or "O", 
+    and who will go first. 
     
     Players take turns filling in the squares on the standard 3 x 3 grid until either one player wins by
     filling 3 squares in a row, or all 9 squares are filled. If all 9 squares are filled, but neither 
@@ -63,35 +63,41 @@ class TicTacToe:
     if self.starter == "Player 1":
       while True:
         self.player_1_move()
+
+        for combo in winning_combinations:
+          
+          if all(move in board.player1_moves for move in combo):
+            board.display_board()
+            return print(f"Congratulations, {players.player1}! You won!\n\n")
+      
         self.player_2_move()
 
         for combo in winning_combinations:
 
-          if combo in board.player1_moves:
+          if all(move in board.player2_moves for move in combo):
             board.display_board()
-            print(f"Congratulations, {players.player1}! You won!\n\n")
-            break
-
-          elif combo in board.player2_moves:
-            board.display_board()
-            print(f"Congratulations, {players.player2}! You won!\n\n")
-            break
+            return print(f"Congratulations, {players.player2}! You won!\n\n")
+  
     else:
       while True:
+
         self.player_2_move()
-        self.player_1_move()
       
         for combo in winning_combinations:
 
-          if combo in board.player2_moves:
+          if all(move in board.player2_moves for move in combo):
             board.display_board()
-            print(f"Congratulations, {players.player2}! You won!\n\n")
-            break
+            return print(f"Congratulations, {players.player2}! You won!\n\n") 
+        
+        self.player_1_move()
 
-          elif combo in board.player1_moves:
+        for combo in winning_combinations:
+
+          if all(move in board.player1_moves for move in combo):
             board.display_board()
-            print(f"Congratulations, {players.player1}! You won!\n\n")
-            break
+            return print(f"Congratulations, {players.player1}! You won!\n\n")
+            
+          
 
 
   def __repr__(self):
@@ -110,50 +116,65 @@ class TicTacToe:
   def player_1_move(self):
     board.display_board()
     try:
-      p1_choice = int(input(f"{players.player1}, make your move.\n"))
+      p1_choice = int(input(f"{players.player1}, make your move.\n") or 1)
       while p1_choice not in range(1, 10) or p1_choice in board.player2_moves or p1_choice in board.player1_moves:
         board.display_board()
-        p1_choice = int(input("\nYour move is not a valid move. Select an available square (1-9).\n"))
+        p1_choice = int(input("\nYour move is not a valid move. Select an available square (1-9).\n") or 1)
     except EOFError:
       p1_choice = 1
     
     board.player1_moves.append(p1_choice)
+    board.player1_moves.sort()
 
   def player_2_move(self):
     board.display_board()
     try:
-      p2_choice = int(input(f"\n{players.player2}, make your move.\n"))
+      p2_choice = int(input(f"\n{players.player2}, make your move.\n") or 1)
       while p2_choice not in range(1,10) or p2_choice in board.player1_moves or p2_choice in board.player2_moves:
         board.display_board()
-        p2_choice = int(input("\nYour move is not a valid move. Select an available square (1-9).\n"))
+        p2_choice = int(input("\nYour move is not a valid move. Select an available square (1-9).\n") or 1)
     except EOFError:
         p2_choice = 1
       
     board.player2_moves.append(p2_choice)
+    board.player2_moves.sort()
 
   
 class Board:
 
-  def __init__(self):
-    self.board = [[1, 2, 3],[4, 5, 6],[7, 8, 9]]
+  def __init__(self, players):
+    self.board = [
+      1, 2, 3,
+      4, 5, 6, 
+      7, 8, 9
+      ]
+    self.visual_board = ("""
+     1 | 2 | 3 
+    -----------
+     4 | 5 | 6 
+    -----------
+     7 | 8 | 9 
+     """)
   
   def display_board(self, player1_moves = [], player2_moves = []):
     
     self.player1_moves = player1_moves
     self.player2_moves = player2_moves
 
-    for move in self.player1_moves:
-      if move in self.board:
-        self.board = self.board.replace(move, player1_symbol)
+    for i, move in enumerate(self.board):
+      if move in self.player1_moves:
+        self.board[i] = players.player1_symbol
+        self.visual_board = self.visual_board.replace(str(move), players.player1_symbol)
     
-    for move in self.player2_moves:
-      if move in self.board:
-        self.board = self.board.replace(move, player2_symbol)
+    for i, move in enumerate(self.board):
+      if move in self.player2_moves:
+        self.board[i] = players.player2_symbol
+        self.visual_board = self.visual_board.replace(str(move), players.player2_symbol) 
 
-    print(self.board)
+    print(self.visual_board)
 
 
-winning_combinations = [
+winning_combinations = (
 [1,4,7],
 [1,5,9],
 [1,2,3],
@@ -162,19 +183,19 @@ winning_combinations = [
 [3,6,9],
 [4,5,6],
 [7,8,9]
-]
+)
 
 
 instructions = Instructions()
 print(instructions)
 
 try:
-  player1 = str(input("\n\nHello, Player 1! What should I call you?\n\n").strip or "Player 1")
-  player2 = str(input("\n\nHello, Player 2! What should I call you?\n\n").strip or "Player 2")
+  player1 = str(input("\n\nHello, Player 1! What should I call you?\n\n").strip() or "Player 1")
+  player2 = str(input("\n\nHello, Player 2! What should I call you?\n\n").strip() or "Player 2")
 except EOFError:
   player1 = "Player 1"
   player2 = "Player 2"
 
 players = Players(player1, player2)
-board = Board()
+board = Board(players)
 game = TicTacToe(players, board)
